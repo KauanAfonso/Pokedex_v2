@@ -4,13 +4,14 @@ import { Card } from '../src/componentes/Card';
 import styles from './Index.module.css';
 import { Header } from '../src/componentes/Header';
 import { See_More } from '../src/componentes/See_More';
+import { useNavigate } from 'react-router-dom';
 
 export function Index() {
     //lidar com o estado para pokemons, limites e offset(Para buscar mais pokemons sem repetir)
     const [pokemons, setPokemons] = useState([]);
     const [limit, setLimit] = useState(10);
     const [offset, setOffset] = useState(0);
-
+    const navigate = useNavigate();
     //fetch na api
     async function fetchPokemons(limit = 10, offset = 0) {
             try {
@@ -22,9 +23,11 @@ export function Index() {
                     const pokemonResponse = await axios.get(pokemon.url);
                     //pegando a url de species
                     const species = await axios.get(pokemonResponse.data.species.url);
+                    
                     // console.log(species.data);
-                    // console.log(pokemonResponse.data);
+                    console.log(pokemonResponse.data);
                     const pokemonData = {
+                        id: pokemonResponse.data.id,
                         name: pokemonResponse.data.name,
                         img: pokemonResponse.data.sprites.front_default,
                         type: pokemonResponse.data.types.map(type => type.type.name).join(', '),
@@ -40,10 +43,6 @@ export function Index() {
             }
         }
         
-        // useEffect(() => {
-        //     fetchPokemons(limit, offset);
-        // }, []);
-
 
     //funcao para ver mais pokemons
     function seeMorePokemons(){
@@ -107,7 +106,8 @@ export function Index() {
                         pokemon.color;
 
                         return (
-                            <Card
+                            <Card 
+                                onClick={() => navigate(`/pokemon/${pokemon.id}`)}
                                 key={index}
                                 name={pokemon.name}
                                 img={pokemon.img}
