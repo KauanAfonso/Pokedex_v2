@@ -1,8 +1,16 @@
 .container_main{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 5rem;
+    padding: 40px;
     justify-items: center;
-    background-color: #f0f0f0;
+    margin: 4rem;
+
+}
+
+
+.section_btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
