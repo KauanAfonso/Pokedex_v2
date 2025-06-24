@@ -69,6 +69,14 @@ export function Index() {
         });
     }
 
+
+    function handleFilterName(event){
+        event.preventDefault(); 
+        const input = event.target.querySelector('input').value.toLowerCase();
+        const filteredPokemons = pokemons.filter(pokemon => pokemon.name.toLowerCase().includes(input));
+        setPokemons(filteredPokemons);
+    }
+
     return(
         <>
         <Header></Header>
@@ -96,6 +104,12 @@ export function Index() {
                     <option value="dark">Dark</option>
                     <option value="fairy">Fairy</option>
                 </select>
+
+                <form action="" onSubmit={handleFilterName}>
+                    <label htmlFor="">Filter by name</label>
+                    <input type="text" name="" id="" />
+                    <button type="submit">Filter</button>
+                </form>
         </section>
             <section>
                 <div className={styles.container_main}>
