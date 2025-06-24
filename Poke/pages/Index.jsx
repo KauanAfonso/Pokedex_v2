@@ -8,10 +8,15 @@
 
     export function Index() {
         //lidar com o estado para pokemons, limites e offset(Para buscar mais pokemons sem repetir)
-        const [pokemons, setPokemons] = useState([]);
+        const [allPokemons, setAllPokemons] = useState([]);
+        const [filteredPokemons, setFilteredPokemons] = useState([]);
         const [limit, setLimit] = useState(10);
         const [offset, setOffset] = useState(0);
+        const [filterType, setFilterType] = useState('');
+        const [filterName, setFilterName] = useState('');
         const navigate = useNavigate();
+        const newPokemons = [];
+
         //fetch na api
         async function fetchPokemons(limit = 10, offset = 0) {
                 try {
@@ -25,7 +30,7 @@
                         const species = await axios.get(pokemonResponse.data.species.url);
                         
                         // console.log(species.data);
-                        console.log(pokemonResponse.data);
+                        // console.log(pokemonResponse.data);
                         const pokemonData = {
                             id: pokemonResponse.data.id,
                             name: pokemonResponse.data.name,
@@ -35,46 +40,67 @@
                             weight: pokemonResponse.data.weight,
                             color: species.data.color.name
                         };
-                        setPokemons(prevPokemons => [...prevPokemons, pokemonData]);
+
+                        newPokemons.push(pokemonData);
+                        // Agora, atualiza o estado incluindo só pokémons novos
+                        setAllPokemons(prev => {
+                        // Evita duplicados pelo id
+                        const allIds = new Set(prev.map(p => p.id));
+                        const filteredNew = newPokemons.filter(p => !allIds.has(p.id));
+                        return [...prev, ...filteredNew];
+                        });
+
+                        setOffset(prev => prev + limit);
                     }
 
                 } catch (error) {
                     console.error('Error fetching Pokemons_base:', error);
                 }
             }
-            
+
+            useEffect(()=>{
+                fetchPokemons(15, 0)
+            }, [])
+
+            useEffect(() => {
+                let filtered = allPokemons;
+
+                if (filterType) {
+                setFilterName("")
+                filtered = filtered.filter(pokemon =>
+                    pokemon.type.split(', ').includes(filterType)
+                );
+                }
+
+                if (filterName) {
+                setFilterType("")
+                filtered = filtered.filter(pokemon =>
+                    pokemon.name.toLowerCase().includes(filterName.toLowerCase())
+                );
+                }
+
+                setFilteredPokemons(filtered);
+        }, [filterType, filterName, allPokemons, limit]);
 
         //funcao para ver mais pokemons
         function seeMorePokemons(){
-            setOffset((li) => li+ limit);
             fetchPokemons(limit, offset)
         }
     
         //lidar com o filtro onde ele filtra com base no filtro
         function handle_filter(event){
-            const value = event.target.value;
-            const pokemonsFiltered = pokemons.filter((poke)=>poke.type.split(', ').includes(value)); //quebrando o tipo pois estaba vindo assim "tipo , tipo02"
-            setPokemons(pokemonsFiltered);
-
-            if(value == ''){
-                fetchPokemons(10,0);
-                return;
-            }
-
-            // Busca mais pokémons e filtra localmente após isso
-            fetchPokemons(200, 0).then(() => {
-                setPokemons(prev =>
-                prev.filter(poke => poke.type.split(', ').includes(value))
-                );
-            });
+            fetchPokemons(890, 0)
+            setFilterType(event.target.value);
         }
 
 
         function handleFilterName(event){
+            setLimit((a) => a=890)
+            fetchPokemons(890, 0)
+            console.log(allPokemons)
             event.preventDefault(); 
             const input = event.target.querySelector('input').value.toLowerCase();
-            const filteredPokemons = pokemons.filter(pokemon => pokemon.name.toLowerCase().includes(input));
-            setPokemons(filteredPokemons);
+            setFilterName(input);
         }
 
         return(
@@ -116,7 +142,7 @@
             </section>
                 <section>
                     <div className={styles.container_main}>
-                        {pokemons.map((pokemon, index) => {
+                        {filteredPokemons.map((pokemon, index) => {
                         const textColor =
                             pokemon.color === "white" ? "gray" :
                             pokemon.color === "yellow" ? "black" :
