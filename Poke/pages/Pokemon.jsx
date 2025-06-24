@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Header } from '../src/componentes/Header';
 import { useParams } from 'react-router-dom';
+import { ViewPokemon } from '../src/componentes/ViewPokemon';
 
 export function Pokemon() {
   const [pokemon, setPokemon] = useState(null);
@@ -12,7 +13,7 @@ export function Pokemon() {
       try {
         const response = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}/`);
         const data = response.data;
-
+        const speciesRes = await axios.get(data.species.url); // <- busca a cor
         const pokemonData = {
           name: data.name,
           height: data.height,
@@ -23,11 +24,14 @@ export function Pokemon() {
             back_default: data.sprites.back_default,
             front_shiny: data.sprites.front_shiny,
             back_shiny: data.sprites.back_shiny,
-          }
+          },
+          stats:data.stats,
+          abilities:data.abilities,
+          color: speciesRes.data.color.name // <- salva a cor
         };
 
         setPokemon(pokemonData);
-        console.log(data)
+        console.log(pokemonData.abilities)
       } catch (error) {
         console.error('Error fetching pokemon:', error);
       }
@@ -48,18 +52,7 @@ export function Pokemon() {
     <>
       <Header />
       <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', textAlign: 'center' }}>
-        <h1 style={{ textTransform: 'capitalize' }}>{pokemon.name}</h1>
-        
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '20px' }}>
-          <img src={pokemon.sprites.front_default} alt={`${pokemon.name} front`} />
-          <img src={pokemon.sprites.back_default} alt={`${pokemon.name} back`} />
-          <img src={pokemon.sprites.front_shiny} alt={`${pokemon.name} front shiny`} />
-          <img src={pokemon.sprites.back_shiny} alt={`${pokemon.name} back shiny`} />
-        </div>
-
-        <p><strong>Tipos:</strong> {pokemon.types.join(', ')}</p>
-        <p><strong>Altura:</strong> {pokemon.height / 10} m</p>
-        <p><strong>Peso:</strong> {pokemon.weight / 10} kg</p>
+        <ViewPokemon pokemonData={pokemon} />
       </div>
     </>
   );
